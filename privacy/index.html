@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy policy - DraftYak</title>
+<meta name="description" content="What the DraftYak website and the Google test app DraftYak S8 spike read, where that stays and when it is deleted.">
+<link rel="icon" href="data:,">
+<style>
+:root{color-scheme:light dark;--fg:#1a1a1a;--bg:#fff;--link:#0b57d0;--visited:#6b2fa0;--rule:#767676}
+@media (prefers-color-scheme:dark){:root{--fg:#ececec;--bg:#141414;--link:#8ab4f8;--visited:#c9a7f5;--rule:#8a8a8a}}
+body{margin:0;padding:1rem;color:var(--fg);background:var(--bg);font:1.0625rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-wrap:anywhere}
+main,footer{max-width:42rem;margin:0 auto}
+h1{margin:1rem 0;font-size:2rem;line-height:1.2}
+h2{margin:2rem 0 .5rem;font-size:1.25rem}
+dt{margin-top:1rem;font-weight:600}
+dd{margin:.25rem 0 0}
+dd ul{margin:0;padding-left:1.25rem}
+li{margin:.25rem 0}
+footer{margin-top:2rem;padding-top:.5rem;border-top:1px solid var(--rule)}
+a{color:var(--link)}
+a:visited{color:var(--visited)}
+</style>
+</head>
+<body>
+<main>
+<h1>Privacy policy</h1>
+<p>Last updated 2026-10-19. This policy is published by the project's developer, Nick Savov. It covers the DraftYak website and the Google test app DraftYak S8 spike.</p>
+
+<h2>This website</h2>
+<p>It is plain HTML, with no cookies, analytics, forms, scripts, fonts or other outside content. It is hosted on GitHub Pages, which may log requests (such as IP addresses) under GitHub's own terms. The DraftYak project does not see those logs.</p>
+
+<h2>DraftYak, the software</h2>
+<p>DraftYak is an open-source (Apache-2.0) project in early development, with no release and no hosted service. It collects no data from anyone. Source code: <a href="https://github.com/draftyak/draftyak">github.com/draftyak/draftyak</a>.</p>
+
+<h2>The Google test app: DraftYak S8 spike</h2>
+<p>DraftYak S8 spike is a short experiment (a "spike") that checks how Gmail handles sent mail, scheduled mail, bursts of requests and revoked access. It runs on the developer's own computer, and only the developer uses it, with one new Gmail account made for this test (not a personal or work account). Google has not verified the app.</p>
+<dl>
+<dt>Permissions it asks for</dt>
+<dd>Three: sign-in with Google (openid), the account's email address (userinfo.email) and Gmail (gmail.modify, which lets it read, compose and send email).</dd>
+<dt>What it reads</dt>
+<dd>In the test account only: its email address; the IDs, labels, dates and a few headers (such as To, Subject and Date) of its messages; and the text of the test messages the program sent itself, to recognize them. The account is new and holds no real mail.</dd>
+<dt>What it sends</dt>
+<dd>Up to 8 short test emails (normally 2) with plain test text, from the test account to the developer's own other mailbox, plus one that the developer schedules by hand in Gmail.</dd>
+<dt>What it is used for</dt>
+<dd>Only this test. It is not used for advertising, not sold, and not used to train or improve any AI or machine-learning model. The program uses no AI.</dd>
+<dt>Who it is shared with</dt>
+<dd>No one. The program's requests go only to Google's sign-in and Gmail servers, and the project has no server that could receive them.</dd>
+<dt>Where it stays, and when it is deleted</dt>
+<dd>
+<ul>
+<li>Sign-in token and the app's credentials: in a file on the developer's computer that is never added to the repository. Deleted at the end of the test session; after that nobody can sign in to the test app.</li>
+<li>Permissions: all revoked with Google by the end of the session, and checked. Deleting the credentials ends any that remain.</li>
+<li>Working notes (the email addresses involved, the test account's name and the IDs of the test messages) and progress logs: in folders on the developer's computer, outside the public repository. Deleted after the results are recorded in the repository.</li>
+<li>Results: one file of measurements in the public repository, such as how many seconds Gmail took to list a message. It holds no token, email address, name or message text, and message IDs in it are one-way hashes. It is kept.</li>
+<li>Test messages: in the test account and the developer's other mailbox until the developer deletes them.</li>
+<li>To remove any app's access yourself: Google Account &rarr; Security &rarr; Your connections to third-party apps &amp; services.</li>
+</ul>
+</dd>
+</dl>
+
+<h2>Google's Limited Use requirements</h2>
+<p>The use of information received from Google Workspace scopes will adhere to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google User Data Policy</a>, including the <a href="https://developers.google.com/terms/api-services-user-data-policy#additional_requirements_for_specific_api_scopes">Limited Use requirements</a>.</p>
+
+<h2>Changes and questions</h2>
+<p>If DraftYak starts to handle Google user data in any other way, this page will be updated first. Questions: open an issue at <a href="https://github.com/draftyak/draftyak/issues">github.com/draftyak/draftyak/issues</a> (issues are public).</p>
+</main>
+<footer>
+<p><a href="https://draftyak.com/">DraftYak home</a></p>
+</footer>
+</body>
+</html>
