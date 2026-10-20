@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-uXQi5+9CFS/aGR7qQ/MEnjaQo3eKvRUUYCl0Wz4KekM='; style-src 'unsafe-inline'; img-src data:; connect-src 'none'; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>WebOTP test - DraftYak</title>
+<meta name="description" content="A manual, SMS-only WebOTP test. The page never sends a text message or displays, saves or transmits the code.">
+<link rel="icon" href="data:,">
+<style>
+:root{color-scheme:light dark;--fg:#1a1a1a;--bg:#fff;--link:#0b57d0;--visited:#6b2fa0;--rule:#767676}
+@media (prefers-color-scheme:dark){:root{--fg:#ececec;--bg:#141414;--link:#8ab4f8;--visited:#c9a7f5;--rule:#8a8a8a}}
+body{margin:0;padding:1rem;color:var(--fg);background:var(--bg);font:1.0625rem/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow-wrap:anywhere}
+main{max-width:42rem;margin:0 auto}
+h1{margin:1rem 0;font-size:2rem;line-height:1.2}
+h2{margin:2rem 0 .5rem;font-size:1.25rem}
+a{color:var(--link)}
+a:visited{color:var(--visited)}
+pre{padding:1rem;border:1px solid var(--rule);white-space:pre-wrap;overflow-wrap:anywhere}
+button{margin:0 .5rem .5rem 0;padding:.6rem 1rem;border:1px solid var(--rule);border-radius:.25rem;background:var(--bg);color:var(--fg);font:inherit}
+button:not(:disabled){cursor:pointer}
+button:disabled{opacity:.6}
+button:focus-visible,a:focus-visible{outline:3px solid var(--link);outline-offset:3px}
+#status{min-height:3.2em}
+</style>
+</head>
+<body>
+<main>
+<h1>WebOTP test</h1>
+<p>This page checks whether your browser can return a one-time code from a test SMS. It sends no text message and never asks for a phone number. Use a made-up code, never an account or sign-in code.</p>
+<h2>Before starting</h2>
+<p>Open <a href="https://draftyak.com/webotp/">https://draftyak.com/webotp/</a> directly on the receiving phone. Select <strong>Start</strong> before the planned test SMS is sent from the other phone. If the browser asks to share the code with this site, you can accept or decline.</p>
+<p>In that test SMS, replace <code>CODE</code> in both places below with the same fresh six made-up digits. Keep the domain line last, with one space before <code>#</code>; do not add a URL scheme, path or another line.</p>
+<pre>DYTEST-Your code is CODE
+
+@draftyak.com #CODE</pre>
+<p>The page has a two-minute timeout. <strong>Cancel</strong> stops the request. It shows only a fixed result, never the code. It does not authenticate an account or check whether the code matches an expected value.</p>
+<button id="start" type="button" disabled>Start</button>
+<button id="cancel" type="button" disabled>Cancel</button>
+<p id="status" role="status" aria-live="polite" aria-atomic="true">Nothing has started. JavaScript and a browser with WebOTP support are required.</p>
+<noscript><p>JavaScript is disabled. No WebOTP request will start.</p></noscript>
+<p>The page uses no cookies, storage or analytics. Its script sends no network requests. It drops its references to a returned code when the request finishes. <a href="https://draftyak.com/privacy/">Privacy policy</a>.</p>
+<p>Technical references: <a href="https://developer.chrome.com/docs/identity/web-apis/web-otp" rel="noreferrer">Chrome WebOTP documentation</a> and the <a href="https://wicg.github.io/sms-one-time-codes/" rel="noreferrer">origin-bound SMS format</a>.</p>
+<p><a href="https://draftyak.com/">DraftYak home</a></p>
+</main>
+<script>
+(() => {
+  "use strict";
+  const start = document.getElementById("start");
+  const cancel = document.getElementById("cancel");
+  const status = document.getElementById("status");
+  let active = null;
+
+  function available() {
+    return window.isSecureContext &&
+      window.location.origin === "https://draftyak.com" &&
+      window.top === window.self &&
+      "OTPCredential" in window &&
+      typeof navigator.credentials?.get === "function" &&
+      typeof AbortController === "function";
+  }
+
+  function finish(request, message) {
+    if (active !== request) return;
+    active = null;
+    clearTimeout(request.timer);
+    request.timer = null;
+    request.controller.abort();
+    request.controller = null;
+    start.disabled = !available();
+    cancel.disabled = true;
+    status.textContent = message;
+  }
+
+  async function begin() {
+    if (active !== null) return;
+    if (!available()) {
+      start.disabled = true;
+      status.textContent = "WebOTP is unavailable here. Open this page directly at https://draftyak.com/webotp/ in a compatible browser.";
+      return;
+    }
+    const request = {
+      controller: new AbortController(),
+      timer: null,
+      deadline: performance.now() + 2 * 60 * 1000
+    };
+    active = request;
+    start.disabled = true;
+    cancel.disabled = false;
+    status.textContent = "Waiting for the planned test SMS. You can cancel at any time.";
+    request.timer = setTimeout(() => {
+      finish(request, "Timed out. No code was recorded by this page.");
+    }, 2 * 60 * 1000);
+    let credential = null;
+    let code = "";
+    try {
+      credential = await navigator.credentials.get({
+        otp: { transport: ["sms"] },
+        signal: request.controller.signal
+      });
+      if (active !== request) return;
+      if (performance.now() >= request.deadline) {
+        finish(request, "Timed out. No code was recorded by this page.");
+        return;
+      }
+      if (credential?.type === "otp") code = credential.code;
+      const received = typeof code === "string" && code.length > 0;
+      finish(request, received
+        ? "WebOTP returned a code. The code was not displayed, saved or sent by this page."
+        : "No WebOTP code was returned. Nothing was recorded by this page.");
+    } catch {
+      finish(request, "WebOTP did not complete. Permission may have been declined or the browser could not receive a code. Nothing was recorded by this page.");
+    } finally {
+      code = "";
+      credential = null;
+    }
+  }
+
+  start.addEventListener("click", begin);
+  cancel.addEventListener("click", () => {
+    if (active !== null) finish(active, "Cancelled. No code was recorded by this page.");
+  });
+  window.addEventListener("pagehide", () => {
+    if (active !== null) finish(active, "Cancelled. No code was recorded by this page.");
+  });
+  start.disabled = !available();
+  status.textContent = start.disabled
+    ? "WebOTP is unavailable here. Open this page directly at https://draftyak.com/webotp/ in a compatible browser."
+    : "Ready. Select Start before the planned test SMS is sent.";
+})();
+</script>
+</body>
+</html>
